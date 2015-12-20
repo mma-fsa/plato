@@ -2,7 +2,7 @@
 # or user-specified named arguments.
 from plato.core.impl.column import Column as ColumnImpl
 
-def Column(function=None, automatically_call=False):
+def column(function=None, automatically_call=False):
     if function:
         return ColumnImpl(function, automatically_call, None)
     else:        

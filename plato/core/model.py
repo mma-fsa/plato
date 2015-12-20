@@ -3,19 +3,21 @@ Created on Aug 8, 2015
 
 @author: mike
 '''
+from plato.util.service_locator import ServiceLocator
 
 class Model(object):
 
     __columns = None
 
-    def __init__(self, params):
+    def __init__(self, identifier, data_context=None, parent_model=None,
+                 service_locator=ServiceLocator()):
+        self.initializing = True
+        self.__identifier =  identifier
+        self.__service_locator = service_locator
         self.__columns = self.__get_columns()
-
-    def startup(self, inforce):
-        raise ModelException('You must implement startup in your model')
-    
-    def timestep_start(self, t):
-        pass
+        self.__data_context = data_context
+        self.__parent_model = parent_model
+        self.initializing = False    
     
     def do_timestep(self, t):
         if self.__columns == None:
@@ -24,12 +26,6 @@ class Model(object):
             if Model.__is_auto_call_column(col):
                 col(t)
     
-    def timestep_end(self, t):
-        pass
-    
-    def shutdown(self):
-        pass
-    
     def __get_columns(self):
         columns = dict()
         for prop_name in dir(self):
@@ -37,6 +33,22 @@ class Model(object):
             if Model.__is_column(prop_val):
                 columns[prop_name] = prop_val
         return columns
+    
+    @property
+    def identifier(self):
+        return self.__identifier 
+    
+    @property
+    def parent_model(self):
+        return self.__parent_model
+    
+    @property
+    def data_context(self):
+        return self.__data_context
+    
+    @property
+    def service_locator(self):
+        return self.__service_locator
     
     @staticmethod
     def __is_column(it):

@@ -1,15 +1,9 @@
-'''
-Created on Aug 8, 2015
+from plato.core.impl.submodel import SubModel as SubModelImpl
 
-@author: mike
-'''
+def submodel(factory_function=None, data_context_property=None):
+    if factory_function:
+        return SubModelImpl(factory_function, data_context_property)
+    else:
+        def submodel_wrapper(factory_function):
+            return SubModelImpl(factory_function, data_context_property)
 
-class SubmodelArray(object):
-    '''
-    classdocs
-    '''
-    def __init__(self, submodel_type, size):
-        pass
-    
-    def __getattribute__(self, *args, **kwargs):                
-        return object.__getattribute__(self, *args, **kwargs)

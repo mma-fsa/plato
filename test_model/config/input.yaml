@@ -1,0 +1,13 @@
+policies:
+ - {id: 1, plan_name: 'hybrid', pmt: 1234.57, period_certain_months: 15, units: 3.0}
+ - {id: 2, plan_name: 'hybrid', pmt: 556.44, period_certain_months: 45, units: 1.0}
+ - {id: 3, plan_name: 'period_certain', pmt: 403.22, period_certain_months: 24, units: 1.0}
+ - {id: 4, plan_name: 'period_certain', pmt: 556.44, period_certain_months: 60, units: 2.0}
+ - {id: 5, plan_name: 'life_contingent', pmt: 356.44, period_certain_months: 0, units: 3.0}
+ - {id: 6, plan_name: 'life_contingent', pmt: 256.44, period_certain_months: 0, units: 1.0}
+ - {id: 7, plan_name: 'life_contingent', pmt: 456.44, period_certain_months: 0, units: 1.0}
+reserve_interest_rate: {
+    hybrid: 1.045,
+    life_contingent: 1.033,
+    period_certain: 1.025
+}
