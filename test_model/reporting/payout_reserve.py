@@ -1,13 +1,13 @@
 from plato.core.model import Model
-from plato.core.column import column
-from plato.core.submodel import submodel
+from plato.core.decorator import column.column
+from plato.core.decorators import submodel.submodel
 from test_model.illustrations.hybrid_annuity import HybridAnnuity,\
     DecrementedHybridAnnuity
 from test_model.illustrations.period_certain_annuity import PeriodCertainAnnuity,\
     UnitizedPeriodCertainAnnuity
 from test_model.illustrations.life_contingent_annuity import LifeContingentAnnuity,\
     DecrementedLifeContingentAnnuity
-from plato.core.assumption import assumption
+from plato.core.decorators import assumption.assumption
 
 class PayoutReserveModel(Model):
     

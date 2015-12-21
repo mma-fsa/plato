@@ -3,7 +3,7 @@ Created on Aug 9, 2015
 
 @author: mike
 '''
-from plato.util.service_locator import ServiceLocator
+from plato.core.service_locator import ServiceLocator
 
 class CSVInput(object):
 

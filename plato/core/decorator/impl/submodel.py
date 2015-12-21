@@ -16,8 +16,7 @@ class SubModel(object):
         except TypeError:
             data_context_iter = [self.__data_context]
         for data_context in data_context_iter:
-            self.__submodel_list.append(factory_function(data_context),
-                                        )
+            self.__submodel_list.append(factory_function(data_context))    
     
     def __getitem__(self):
         pass

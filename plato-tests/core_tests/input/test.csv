@@ -1,4 +1,0 @@
-val_mth,val_year,identifier,credit_rating,issuer,mat_day,mat_mth,mat_year,bv,par,mv,cost,book_yield,pay_pct,cpn_period,cpn_type
-1,2012,1,BBB,ACME CORP,1,1,2020,1000,1000,700,1000,3.78,3.78,6,FIX
-1,2012,1,AAA,ORION,1,8,2018,500,500,450,400,3.78,3.78,6,FIX
-1,2012,1,A,ONION,1,1,2017,1000,1000,700,1000,3.78,3.78,6,STEPUP

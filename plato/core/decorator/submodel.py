@@ -1,4 +1,4 @@
-from plato.core.impl.submodel import SubModel as SubModelImpl
+from plato.core.decorator.impl.submodel import SubModel as SubModelImpl
 
 def submodel(factory_function=None, data_context_property=None):
     if factory_function:

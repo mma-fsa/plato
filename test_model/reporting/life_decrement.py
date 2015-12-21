@@ -4,8 +4,8 @@ Created on Dec 18, 2015
 @author: mike
 '''
 from plato.core.model import Model
-from plato.core.assumption import assumption
-from plato.core.column import column
+from plato.core.decorator import assumption.assumption
+from plato.core.decorators import column.column
 
 class LifeDecrementModel(Model):
     
