@@ -40,14 +40,19 @@ class ModelImpl(object):
         column_id_util = ColumnIdentifierUtil(self)
 
         for prop_name in dir(self):
-            prop = getattr(self, prop_name)
+            
+            try:            
+                prop = getattr(self, prop_name)
+            except AttributeError:
+                # property has not been initialized yet, ignore and continue
+                continue
             
             if Column.is_column(prop):
-                col_name = prop_name
-                col = prop                
-                col_storage_id = column_id_util.get_column_identifier(col)
+                column = Column.get_column(prop)
+                col_name = prop_name                                
+                col_storage_id = column_id_util.get_column_identifier(column)
                 storage = self.service_locator.get_storage(col_storage_id)                
-                self.columns[col_name] = ColumnBinding(col, storage, self)
+                self.columns[col_name] = ColumnBinding(column, storage, self)
         
             elif SubModel.is_submodel(prop):
                 submodel_name = prop_name
@@ -59,12 +64,12 @@ class ModelImpl(object):
                 
         locked = object.__getattribute__(self, getattr_lock)
         
-        # guard against infinite recursion (self.submodels triggers recursion)
+        # guard against infinite recursion (self.<prop> triggers recursion)
         if not locked:
             object.__setattr__(self, getattr_lock, True)            
             value = None
             if name in self.columns:
-                value = self.columns[name]            
+                value = self.columns[name]
             elif name in self.submodels:
                 value = self.submodels[name]
             object.__setattr__(self, getattr_lock, False)

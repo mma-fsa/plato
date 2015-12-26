@@ -11,6 +11,12 @@ class Column(ModelFeature):
         super(Column, self).__init__(ColumnMetadata(func, auto_call))        
         self.call_self = None    
     
+    def __get__(self, call_self, type=None):
+        metadata = Column.get_metadata(self)
+        column_call = ColumnCall(self, call_self, metadata.inner_func) 
+        
+        return column_call
+    
     @staticmethod
     def is_auto_call(it):
         try:
@@ -24,13 +30,22 @@ class Column(ModelFeature):
         return False if metadata == None else metadata.type_descr == 'column'
     
     @staticmethod
-    def get_metadata(it):            
+    def get_column(it):
+        '''
+            TODO: This should maybe be handled with inheiritance, or (even better)
+            a common interface.
+        '''
         if isinstance(it, Column):
-            return ModelFeature.get_metadata(it)
-        elif isinstance(it, ColumnBinding):
-            return ModelFeature.get_metadata(it.column)
+            return it
+        elif isinstance(it, ColumnBinding) or isinstance(it, ColumnCall):
+            return it.column                    
         else:
-            return None    
+            return None
+    
+    @staticmethod
+    def get_metadata(it):
+        column = Column.get_column(it)
+        return None if column == None else ModelFeature.get_metadata(column)
     
     @staticmethod
     def get_column_name(col):
@@ -38,6 +53,20 @@ class Column(ModelFeature):
             return Column.get_metadata(col).inner_func.__name__
         except AttributeError:
             return None
+
+class ColumnCall(object):
+    
+    def __init__(self, column, call_self, func):
+        self.__column = column
+        self.__call_self = call_self
+        self.__func = func
+    
+    def __call__(self, *args):
+        return self.__func(self.__call_self, *args)
+        
+    @property
+    def column(self):
+        return self.__column
         
 class ColumnBinding(Column):
     
