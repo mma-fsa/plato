@@ -13,7 +13,11 @@ class DataContextNavigator(object):
         curr_obj = self.__data_context
         for prop in property_str.split('.'):
             if prop:
-                curr_obj = getattr(curr_obj, prop)
+                try:
+                    curr_obj = curr_obj[prop]
+                except (AttributeError, KeyError):
+                    curr_obj = getattr(curr_obj, prop)
+                                        
         return curr_obj
  
         

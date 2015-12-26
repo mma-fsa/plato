@@ -4,90 +4,160 @@ Created on Dec 20, 2015
 @author: mike
 '''
 import unittest
-import types
-from plato.core.decorator.impl.column import Column, ColumnMetadata
+from plato.core.decorator.impl.column import Column, ColumnMetadata,\
+    ColumnBinding
 
 
 class ColumnTest(unittest.TestCase):
 
     def testIsColumn(self):
         col = Column(lambda x: x, False)
-        self.assertTrue(Column.is_column(col.__call__)) 
-        self.assertFalse(Column.is_auto_call(col.__call__))
+        self.assertTrue(Column.is_column(col)) 
+        self.assertFalse(Column.is_auto_call(col))
 
     def testIsAutoCallColumn(self):
         col = Column(lambda x: x, True)
-        self.assertTrue(Column.is_column(col.__call__))
-        self.assertTrue(Column.is_auto_call(col.__call__))
+        self.assertTrue(Column.is_column(col))
+        self.assertTrue(Column.is_auto_call(col))
         
     def testGetMetadata(self):
         col = Column(lambda x: x, True)
-        metadata = Column.get_metadata(col.__call__)
+        metadata = Column.get_metadata(col)
         self.assertIsInstance(metadata, ColumnMetadata, \
                               'Expected column metadata')
         
-    def testColumnCall(self):
+    def testNoArgColumn(self):
+                        
+        storage = {}
+        model = object()
         
-        def func_factory():
-            func_factory.call_count = 0
-            def column_body(self):
-                func_factory.call_count +=  1
-                return 'called ' + str(func_factory.call_count)
-            return column_body
+        def get_col_fn(unit_test, expected_model):
+            get_col_fn.call_count = 0
+            def column_fn(self):                
+                get_col_fn.call_count += 1
+                # check that argument passed in is the model                
+                unit_test.assertEqual(expected_model, self)                                            
+                return 100
+            
+            return column_fn
+        
+        # Setup a function to memoize
+        column_fn = get_col_fn(self, model)
+        
+        # Setup the Column
+        column = Column(column_fn, True)
+        
+        # Setup the ColumnBinding, maps a column to it's storage
+        # and provides a callable interface
+        column_binding = ColumnBinding(column, storage, model)
+        
+        # Call the column        
+        self.assertEqual(get_col_fn.call_count, 0)
+        column_binding()
+        self.assertEqual(get_col_fn.call_count, 1)
+        self.assertEqual({tuple() : 100}, storage)
+        
+        # subsequent calls should have no effect
+        for i in xrange(1, 10):
+            column_binding()
+            self.assertEqual({tuple() : 100}, storage)
+            self.assertEqual(get_col_fn.call_count, 1)
+            
+    def testSingleArgColumn(self):
         
         storage = {}
-        col = Column(func_factory(), True, storage)
+        model = object()
         
-        col_result = col()
-        self.assertEqual(col_result, 'called 1', \
-                         'unexpected value: ' + col_result)
-        self.assertTrue(func_factory.call_count == 1)
+        def get_col_fn(unit_test, expected_model):
+            get_col_fn.call_count = 0
+            def column_fn(self, t):
+                # check that argument passed in is the model
+                get_col_fn.call_count += 1                
+                unit_test.assertEqual(expected_model, self)                                            
+                return 100 * t 
+            return column_fn
         
-        col_result2 = col()
-        self.assertEqual(col_result2, 'called 1', \
-                         'unexpected value: ' + col_result2)
-        self.assertTrue(func_factory.call_count == 1)
+        # Setup a function to memoize
+        column_fn = get_col_fn(self, model)
         
-    def testColumnCallArguments(self):
+        # Setup the Column
+        column = Column(column_fn, True)
         
-        def func_factory():
-            func_factory.call_count = 0
-            def column_body(self, t):
-                func_factory.call_count +=  1
-                return t * 10
-            return column_body
+        # Setup the ColumnBinding, maps a column to it's storage
+        # and provides a callable interface
+        column_binding = ColumnBinding(column, storage, model)
+        
+        # Call the column        
+        self.assertEqual(get_col_fn.call_count, 0)
+        column_binding(2)
+        self.assertEqual(get_col_fn.call_count, 1)
+        self.assertEqual({(2,) : 200}, storage)
+        
+        # Call column again
+        column_binding(3)
+        self.assertEqual(get_col_fn.call_count, 2)
+        self.assertEqual({(2,) : 200, (3,) : 300}, storage)
+        
+        # subsequent calls should have no effect
+        for i in xrange(1, 10):
+            column_binding(2)
+            column_binding(3)
+            self.assertEqual(get_col_fn.call_count, 2)
+            self.assertEqual({(2,) : 200, (3,) : 300}, storage)
+        
+        # Call column again
+        column_binding(4)
+        self.assertEqual(get_col_fn.call_count, 3)
+        self.assertEqual({(2,) : 200, (3,) : 300, (4,):400},  storage)
+        
+    def testMultiArgColumn(self):
         
         storage = {}
-        col = Column(func_factory(), True, storage)
+        model = object()
         
-        results = [col(3), col(1), col(1), col(2), col(1), col(2)]
-        expected_results = [30, 10, 10, 20, 10, 20]
+        def get_col_fn(unit_test, expected_model):
+            get_col_fn.call_count = 0
+            def column_fn(self, t, s):
+                # check that argument passed in is the model
+                get_col_fn.call_count += 1                
+                unit_test.assertEqual(expected_model, self)                                            
+                return 100 * t + s
+            return column_fn
         
-        self.assertEqual(expected_results, results)
-        self.assertEqual(func_factory.call_count, 3)
-        self.assertEqual({(1,): 10, (2,): 20, (3,): 30}, storage)
-    
-    
-    def testColumnCallMultipleArguments(self):
+        # Setup a function to memoize
+        column_fn = get_col_fn(self, model)
         
-        def func_factory():
-            func_factory.call_count = 0
-            def column_body(self, x, y):
-                func_factory.call_count +=  1
-                return x * 10 + y
-            return column_body
+        # Setup the Column
+        column = Column(column_fn, True)
         
-        storage = {}
-        col = Column(func_factory(), True, storage)
+        # Setup the ColumnBinding, maps a column to it's storage
+        # and provides a callable interface
+        column_binding = ColumnBinding(column, storage, model)
         
-        results = [col(1, 3), col(1, 2), col(3, 3), col(1, 3), col(2, 1), \
-                   col(3, 3)]
-        expected_results = [13, 12, 33, 13, 21, 33]
+        # Call the column        
+        self.assertEqual(get_col_fn.call_count, 0)
+        column_binding(2, 0)
+        self.assertEqual(get_col_fn.call_count, 1)
+        self.assertEqual({(2, 0) : 200}, storage)
         
-        self.assertEqual(expected_results, results)
-        self.assertEqual(func_factory.call_count, 4)
-        self.assertEqual({(1,3): 13, (1,2): 12, (3,3): 33, (2,1):21}, storage)
-
+        # Call column again
+        column_binding(3, 1)
+        self.assertEqual(get_col_fn.call_count, 2)
+        self.assertEqual({(2, 0) : 200, (3, 1) : 301}, storage)
+        
+        # subsequent calls should have no effect
+        for i in xrange(1, 10):
+            column_binding(2, 0)
+            column_binding(3, 1)
+            self.assertEqual(get_col_fn.call_count, 2)
+            self.assertEqual({(2, 0) : 200, (3, 1) : 301}, storage)
+        
+        # Call column again
+        column_binding(3, 0)
+        self.assertEqual(get_col_fn.call_count, 3)
+        self.assertEqual({(2, 0) : 200, (3, 1) : 301, (3, 0): 300}, storage)
+        
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testIsColumn']
     unittest.main()

@@ -5,7 +5,7 @@ Created on Dec 20, 2015
 '''
 from plato.core.service_locator import ServiceLocator
 from plato.core.storage.in_memory_storage_repository import InMemoryStorageRepository
-from _collections import defaultdict
+from collections import defaultdict
 
 class ModelSetupUtility(object):
 
@@ -14,7 +14,7 @@ class ModelSetupUtility(object):
     
     @staticmethod
     def setup_service_locator(storage=None):
-        storage = storage if storage else defaultdict(dict)
+        storage = storage if storage != None else defaultdict(dict)
         storage_repository = InMemoryStorageRepository(storage)
         service_locator = ServiceLocator(storage_repository=storage_repository)
         return {'storage':storage, 'storage_repository': storage_repository,\
@@ -23,10 +23,21 @@ class ModelSetupUtility(object):
     @staticmethod
     def setup_test_model(model_class, identifier='test_model', 
                          data_context={}, parent_model=None,
-                         service_locator=ServiceLocator()):
-        return model_class(identifier, data_context=data_context,
+                         service_locator=ServiceLocator(),
+                         test=None):
+        
+        model = None
+        if test != None:
+            model = model_class(identifier, data_context=data_context,
+                          parent_model=parent_model,
+                          service_locator=service_locator,
+                          test=test)
+        else:  
+            model = model_class(identifier, data_context=data_context,
                           parent_model=parent_model,
                           service_locator=service_locator)
+        
+        return model
 
 
 

@@ -8,7 +8,7 @@ import collections
 class InMemoryStorageRepository(object):
     
     def __init__(self, storage=None):
-        self.column_storage = storage if storage \
+        self.column_storage = storage if storage != None \
             else collections.defaultdict(dict)
     
     def get_storage(self, column_identifier):
