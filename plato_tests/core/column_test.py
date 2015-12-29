@@ -5,7 +5,7 @@ Created on Dec 20, 2015
 '''
 import unittest
 from plato.core.decorator.impl.column import Column, ColumnMetadata,\
-    ColumnBinding
+    BoundColumnCall
 
 
 class ColumnTest(unittest.TestCase):
@@ -26,7 +26,7 @@ class ColumnTest(unittest.TestCase):
         self.assertIsInstance(metadata, ColumnMetadata, \
                               'Expected column metadata')
         
-    def testNoArgColumn(self):
+    def testNoArgBoundColumn(self):
                         
         storage = {}
         model = object()
@@ -49,7 +49,7 @@ class ColumnTest(unittest.TestCase):
         
         # Setup the ColumnBinding, maps a column to it's storage
         # and provides a callable interface
-        column_binding = ColumnBinding(column, storage, model)
+        column_binding = BoundColumnCall(column, storage, model)
         
         # Call the column        
         self.assertEqual(get_col_fn.call_count, 0)
@@ -63,7 +63,7 @@ class ColumnTest(unittest.TestCase):
             self.assertEqual({tuple() : 100}, storage)
             self.assertEqual(get_col_fn.call_count, 1)
             
-    def testSingleArgColumn(self):
+    def testSingleArgBoundColumn(self):
         
         storage = {}
         model = object()
@@ -85,7 +85,7 @@ class ColumnTest(unittest.TestCase):
         
         # Setup the ColumnBinding, maps a column to it's storage
         # and provides a callable interface
-        column_binding = ColumnBinding(column, storage, model)
+        column_binding = BoundColumnCall(column, storage, model)
         
         # Call the column        
         self.assertEqual(get_col_fn.call_count, 0)
@@ -110,7 +110,7 @@ class ColumnTest(unittest.TestCase):
         self.assertEqual(get_col_fn.call_count, 3)
         self.assertEqual({(2,) : 200, (3,) : 300, (4,):400},  storage)
         
-    def testMultiArgColumn(self):
+    def testMultiArgBoundColumn(self):
         
         storage = {}
         model = object()
@@ -132,7 +132,7 @@ class ColumnTest(unittest.TestCase):
         
         # Setup the ColumnBinding, maps a column to it's storage
         # and provides a callable interface
-        column_binding = ColumnBinding(column, storage, model)
+        column_binding = BoundColumnCall(column, storage, model)
         
         # Call the column        
         self.assertEqual(get_col_fn.call_count, 0)

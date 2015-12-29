@@ -11,9 +11,9 @@ from plato.core.decorator.column import column
 
 class ModelColumnsTest(unittest.TestCase):
 
-#     def testEmptyModelConstruction(self):
-#         model = ModelSetupUtility.setup_test_model(EmptyModel)
-#         self.assertTrue(model)
+    def testEmptyModelConstruction(self):
+        model = ModelSetupUtility.setup_test_model(EmptyModel)
+        self.assertTrue(model)
 
         
     def testMultipleModelColumnCalls(self):
@@ -115,8 +115,8 @@ class ModelColumnsTest(unittest.TestCase):
         # Check that storage was allocated correctly
         self.assertTrue(model)
         self.assertTrue(len(storage.keys()) == 2)
-        self.assertIn('test_model#timestep_column', storage)
-        self.assertIn('test_model#two_dimensional_column', storage)
+        self.assertIn('sample_model#timestep_column', storage)
+        self.assertIn('sample_model#two_dimensional_column', storage)
            
         self.assertEqual(model.timestep_column_calls, 0)
         self.assertEqual(model.two_dimensional_column_calls, 0)
@@ -128,8 +128,8 @@ class ModelColumnsTest(unittest.TestCase):
            
         self.assertEqual(model.timestep_column_calls, 0)
         self.assertEqual(model.two_dimensional_column_calls, 1)
-        self.assertEqual(storage['test_model#timestep_column'], {})
-        self.assertEqual(storage['test_model#two_dimensional_column'], \
+        self.assertEqual(storage['sample_model#timestep_column'], {})
+        self.assertEqual(storage['sample_model#two_dimensional_column'], \
                         {(2,3) : 302})
            
         # Check that additional calls work correctly
@@ -139,10 +139,42 @@ class ModelColumnsTest(unittest.TestCase):
            
         self.assertEqual(model.timestep_column_calls, 0)
         self.assertEqual(model.two_dimensional_column_calls, 3)
-        self.assertEqual(storage['test_model#timestep_column'], {})        
-        self.assertEqual(storage['test_model#two_dimensional_column'], \
+        self.assertEqual(storage['sample_model#timestep_column'], {})        
+        self.assertEqual(storage['sample_model#two_dimensional_column'], \
                         {(2,3) : 302, (3,3):303, (2,4): 402})
-                
+        
+    
+    def testModelDataContext(self):                
+        
+        dc = {'timestep_column': {1: 10, (2,) : 30},
+              'two_dimensional_column': {(1,2) : 3, (4,5): 6},
+              'ignore_column': {(1,2) : 999, (4,5): 899} }
+                        
+        svc_loc_setup = ModelSetupUtility.setup_service_locator()
+        svc_loc = svc_loc_setup['service_locator']
+        
+        model = ModelSetupUtility.setup_test_model(IgnoreColumnModel, \
+            service_locator=svc_loc, data_context=dc)
+        
+        self.assertEqual(model.timestep_column(1), 10)
+        self.assertEqual(model.timestep_column(2), 30)
+        self.assertEqual(model.timestep_column(3), 30)
+        self.assertEqual(model.timestep_column(3), 30)
+        self.assertEqual(model.timestep_column(1), 10)
+        self.assertEqual(model.timestep_column(2), 30)
+        self.assertEqual(model.timestep_column_calls, 1)
+        
+        self.assertEqual(model.two_dimensional_column(1, 2), 3)
+        self.assertEqual(model.two_dimensional_column(4, 5), 6)
+        self.assertEqual(model.two_dimensional_column(1, 1), 101)
+        self.assertEqual(model.two_dimensional_column(1, 2), 3)
+        self.assertEqual(model.two_dimensional_column(4, 5), 6)
+        self.assertEqual(model.two_dimensional_column(1, 1), 101)
+        self.assertEqual(model.two_dimensional_column_calls, 1)
+        
+        self.assertEqual(model.ignore_column(1, 2), 4)
+        self.assertEqual(model.ignore_column(4, 5), 13)
+        
 
 class EmptyModel(Model):
     pass
@@ -179,6 +211,11 @@ class ColumnModel(Model):
     def static_function(self, x, y):
         return 2 * x + y
 
+class IgnoreColumnModel(ColumnModel):
+    
+    @column(data_context=False)
+    def ignore_column(self, t, s):
+        return 2 * t + s
 
 class DataAndColumnModel(ColumnModel):
     

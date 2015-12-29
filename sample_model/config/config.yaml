@@ -1,0 +1,21 @@
+{
+    'run': {
+        'timestep': &TIMESTEP { 'min': 0, 'max': 360 }
+    },
+    'input': {
+        'file': 'input.yaml'
+    },
+    'output': {        
+        'module': 'plato.data.xlsx_output',
+        'class': 'XlsxOutput',
+        'args': {
+            'timestep': *TIMESTEP,
+            'output_dir': '/home/mike/Documents/test'
+        }
+    },   
+    'model': {
+        'module': 'sample_model.annuity.life_contingent_annuity',
+        'class': 'LifeContingentAnnuity',
+        'identifier': 'lc_annuity'  
+    }   
+}

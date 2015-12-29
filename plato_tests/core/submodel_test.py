@@ -12,7 +12,7 @@ from plato.core.decorator.column import column
 
 class SubmodelTest(unittest.TestCase):
 
-    def testSubmodel(self):
+    def testSubmodelAggregationCalls(self):
         
         dc = {'foo':'bar', 'wat': 13,\
               'child': [{'id': 1, 'val': 100},
@@ -28,11 +28,8 @@ class SubmodelTest(unittest.TestCase):
         parent = ModelSetupUtility.setup_test_model(ParentModel,\
             'parent', data_context=dc, test=self)
         
-#         submodel = parent.child_model
-        thing = parent.child_model.value()
-        othing = parent.child_model.arg_value(100)
-                
-        self.assertEqual(parent.child_model.value == 4500)
+        self.assertEqual(parent.child_model.value(), 4500)
+        self.assertEqual(parent.child_model.arg_value(100), 4500 + 9 * 200)
 
 
 class ParentModel(Model):
@@ -51,7 +48,7 @@ class ParentModel(Model):
         return self.__test
     
     @submodel(data_context='child')
-    def child_model(self, data, args, kwargs):
+    def child_model(self, data, kwargs):
         
         self.child_model_ctor_calls += 1
         
@@ -59,7 +56,7 @@ class ParentModel(Model):
         self.test.assertIn('val', data)
         self.test.assertEquals(data['id'] * 100, data['val'])
         
-        return ChildModel(*args, **kwargs)
+        return ChildModel('child_model_' + str(data['id']), **kwargs)
 
 class ChildModel(Model):
     
@@ -72,7 +69,7 @@ class ChildModel(Model):
     
     @column
     def arg_value(self, t):
-        return self.data_context['val'] + t * 10
+        return self.data_context['val'] + t * 2
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

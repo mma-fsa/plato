@@ -19,6 +19,7 @@ class ColumnIdentifierUtil(object):
         self.__model_identifier = '.'.join(model_identifiers) + '#'
     
     def get_column_identifier(self, column):
-        col_id = self.__model_identifier + Column.get_column_name(column)                                         
-        return ColumnIdentifier(col_id, column)
+        col_id = self.__model_identifier + Column.get_column_name(column)
+        metadata = {'args': getargspec(Column.get_metadata(column).inner_func)}                             
+        return ColumnIdentifier(col_id, column, metadata)
     

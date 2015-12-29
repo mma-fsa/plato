@@ -20,8 +20,6 @@ class Test(unittest.TestCase):
         col_id = util.get_column_identifier(m.some_test_col)
         
         self.assertEqual(col_id, 'test_model_1#some_test_col')
-        self.assertEqual(col_id, 'test_model_1#some_test_col')
-        self.assertEqual(col_id.column, m.some_test_col)
     
     def testNestedModelGetColumnId(self):
         
@@ -35,8 +33,6 @@ class Test(unittest.TestCase):
         col_id = util.get_column_identifier(child_model.some_test_col)
         
         self.assertEqual(col_id, 'parent_model.child_model#some_test_col')
-        self.assertEqual(col_id.column, child_model.some_test_col)
-        self.assertEqual(col_id.column, parent_model.some_test_col)
 
 class TestModel(Model):
     

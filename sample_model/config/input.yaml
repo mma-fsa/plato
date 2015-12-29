@@ -1,0 +1,33 @@
+{   mortality: &MORTALITY {
+        40: .07,
+        41: .07,
+        42: .07,
+        43: .07,
+        44: .07,
+        45: .08,
+        46: .08,
+        47: .08,
+        48: .08,
+        49: .08,
+        50: .08,
+        51: .08,
+        52: .09,
+        53: .09,
+        54: .09,
+        55: .09,
+        56: .09,
+        57: .09,
+        58: .09,
+        59: .09,
+        60: .09
+    },
+    policies: [
+        {id: 1, plan_name: 'hybrid', pmt: 1234.57, period_certain_months: 15, units: {0: 3.0}, mortality: *MORTALITY},
+        {id: 2, plan_name: 'hybrid', pmt: 556.44, period_certain_months: 45, units: {0: 1.0}, mortality: *MORTALITY},
+        {id: 3, plan_name: 'period_certain', pmt: 403.22, period_certain_months: 24, units: {0: 3.0}, mortality: *MORTALITY},
+        {id: 4, plan_name: 'period_certain', pmt: 556.44, period_certain_months: 60, units: {0: 1.0}, mortality: *MORTALITY},
+        {id: 5, plan_name: 'life_contingent', pmt: 356.44, period_certain_months: 0, units: {0: 2.0}, mortality: *MORTALITY},
+        {id: 6, plan_name: 'life_contingent', pmt: 256.44, period_certain_months: 0, units: {0: 1.0}, mortality: *MORTALITY},
+        {id: 7, plan_name: 'life_contingent', pmt: 456.44, period_certain_months: 0, units: {0: 2.0}, mortality: *MORTALITY}
+    ]
+}

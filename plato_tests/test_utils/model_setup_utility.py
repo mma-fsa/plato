@@ -21,7 +21,7 @@ class ModelSetupUtility(object):
                 'service_locator': service_locator}
     
     @staticmethod
-    def setup_test_model(model_class, identifier='test_model', 
+    def setup_test_model(model_class, identifier='sample_model', 
                          data_context={}, parent_model=None,
                          service_locator=ServiceLocator(),
                          test=None):

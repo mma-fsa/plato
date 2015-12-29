@@ -15,3 +15,5 @@ class ServiceLocator(object):
         
     def get_storage(self, storage_identifier):
         return self.__storage_repository.get_storage(storage_identifier);
+    
+    

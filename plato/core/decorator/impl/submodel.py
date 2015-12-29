@@ -66,9 +66,10 @@ class SubModelBinding(object):
         models_for_col_names = defaultdict(list)
         
         for data_context in data_context_iter:
-            submodel = factory_fn(parent_model, data_context, 
-                                  parent_model.ctor_args, 
-                                  parent_model.ctor_kwargs)
+            kwargs = dict(parent_model.ctor_kwargs)
+            kwargs['data_context'] = data_context
+            
+            submodel = factory_fn(parent_model, data_context, kwargs)
             
             for col_name in submodel.columns.keys():
                 models_for_col_names[col_name].append(submodel)
@@ -86,10 +87,14 @@ class SubModelBinding(object):
         locked = object.__getattribute__(self, getattr_lock)
         
         if not locked:
+            value = None
             object.__setattr__(self, getattr_lock, True)
             if name in self.aggregators:
-                return self.aggregators[name]
+                value = self.aggregators[name]
             object.__setattr__(self, getattr_lock, False)
+            
+            if value != None:
+                return value
         
         return object.__getattribute__(self, name) 
     
