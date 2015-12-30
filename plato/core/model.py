@@ -8,19 +8,22 @@ from plato.util.column_identifier_util import ColumnIdentifierUtil
 from plato.core.decorator.impl.column import Column, BoundColumnCall
 from plato.core.decorator.impl.submodel import SubModel, SubModelBinding
 from plato.util.data_context_navigator import DataContextNavigator
+import inspect
 
 class ModelImpl(object):
 
     __columns = None
 
     def __init__(self, identifier, data_context=None, parent_model=None,
-                 service_locator=ServiceLocator()):                                        
+                 service_locator=ServiceLocator(), timestep=None):                                        
         self.__getattr_lock = True        
         if identifier.find('.') > -1 or identifier.find('#') > -1:
             raise Exception('Identifier cannot contain "." or "#": ' +
                             identifier)
                     
         self.__identifier =  identifier
+        self.__timestep = timestep if timestep != None else \
+            service_locator.default_timestep
         self.__service_locator = service_locator       
         self.__data_context = data_context
         self.__parent_model = parent_model                
@@ -40,7 +43,7 @@ class ModelImpl(object):
             if metadata.is_automatically_called:
                 col(t)
         
-        for submodel in self.submodels.value():
+        for submodel in self.submodels.values():
             submodel.do_timestep(t)
 
     def __setup_columns(self):
@@ -81,10 +84,26 @@ class ModelImpl(object):
                     metadata.data_context                
                 try: column_context = dc_navigator.navigate(dc_prop)
                 except (AttributeError, KeyError):
-                    raise Exception('Unable to bind data_context for column'
+                    raise Exception(type(self).__name__ +                                    
+                                    ', missing data_context value for column '
                                      '%(col_name)s: %(dc_prop)s'
                                      '\n\t data_context = %(dc)s' % locals())
-                                    
+                
+                # allow binding primitives to single argument functions
+                if not isinstance(column_context, dict):
+                    args = inspect.getargspec(metadata.inner_func).args
+                    if args == ['self']:
+                        column_context = {tuple():column_context}    
+                    else:
+                        raise Exception(type(self).__name__ +                                        
+                                        ', data_context error for column '
+                                        '%s(col_name), unexpected data type. '
+                                        'Must be dictionary, since the function'
+                                        ' takes multiple arguments '
+                                        '(not just "self"\ndata_context='
+                                        '%(column_context)' % column_context)                   
+                    
+                                                    
                 for args, val in column_context.iteritems():
                     col.set_value(args, val)        
     
@@ -130,6 +149,10 @@ class ModelImpl(object):
     @property
     def service_locator(self):
         return self.__service_locator
+    
+    @property
+    def timestep(self):
+        return self.__timestep
 
 # wrapper to required to store the kwargs
 class Model(ModelImpl):

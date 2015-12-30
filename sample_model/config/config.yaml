@@ -14,8 +14,8 @@
         }
     },   
     'model': {
-        'module': 'sample_model.annuity.life_contingent_annuity',
-        'class': 'LifeContingentAnnuity',
-        'identifier': 'lc_annuity'  
+        'module': 'sample_model.reserve.net_premium_reserve',
+        'class': 'NetPremiumReserve',
+        'identifier': 'net_premium_reserve'  
     }   
 }

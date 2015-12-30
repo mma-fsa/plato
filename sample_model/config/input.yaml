@@ -21,6 +21,7 @@
         59: .09,
         60: .09
     },
+    stat_rate: .01,
     policies: [
         {id: 1, plan_name: 'hybrid', pmt: 1234.57, period_certain_months: 15, units: {0: 3.0}, mortality: *MORTALITY},
         {id: 2, plan_name: 'hybrid', pmt: 556.44, period_certain_months: 45, units: {0: 1.0}, mortality: *MORTALITY},

@@ -18,9 +18,10 @@ class LifeContingentAnnuity(Model):
     def mortality(self, attained_age): pass        
     
     @column(data_context=True)
-    def units(self, t): pass
+    def units(self, t):
+        return self.units(t - 1)
     
     @column(automatically_call=True)
-    def cashflow(self, t):
+    def liability(self, t):
         return self.units(t) * self.payment()
     

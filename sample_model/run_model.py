@@ -13,8 +13,8 @@ if __name__ == '__main__':
         exit_code = 0
         try:
             ModelRunner(config_location, sys.stdout).run()
-        except Exception as e:
-            logging.error(traceback.format_exc())        
+        except Exception as e:                      
+            logging.error(traceback.format_exc())
             exit_code = -1
     else:
         print('ERROR: expected single argument for config directory', 

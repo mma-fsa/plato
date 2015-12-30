@@ -4,13 +4,13 @@ Created on Dec 19, 2015
 @author: mike
 '''
 from __future__ import print_function
-import yaml, os
-import importlib
+import yaml, os, sys, importlib, timeit
 from plato.core.storage.in_memory_storage_repository import InMemoryStorageRepository
-from plato.core.service_locator import ServiceLocator
-
+from plato.core.service_locator import ServiceLocator, Timestep
 
 class ModelRunner(object):
+    
+    recursion_limit = 100000
     
     def __init__(self, config_location, logfile):
         self.__logfile = logfile
@@ -86,28 +86,43 @@ class ModelRunner(object):
         data_context = self.__get_input()
         self.log("\tstorage")
         storage_repo = InMemoryStorageRepository()
-        self.log("\tservice locator")
-        svc_loc = ServiceLocator(storage_repo)
-        self.log("\tmain model")
-        main_model = self.__get_main_model_instance(data_context, svc_loc)
-        
+                
+        self.log("\ttimestep")
         try:
-            time_params = self.config['run']['timestep']
+            time_params = self.config['run']['timestep']            
+            time_params['max'] = int(time_params['max'])
+            time_params['min'] = int(time_params['min'])
             ts_min = time_params['min']
             ts_max = time_params['max']
         except KeyError as e:
-            raise ConfigKeyError(e)
+            raise ConfigKeyError(e)        
+        
+        self.log("\tservice locator")
+        svc_loc = ServiceLocator(storage_repo, 
+                                 default_timestep=Timestep(ts_min, ts_max))
+        self.log("\tmain model")
+        main_model = self.__get_main_model_instance(data_context, svc_loc)
         
         self.log("Running model from %(ts_min)s to %(ts_max)s" % locals())
+        
+        
+        sys.setrecursionlimit(ModelRunner.recursion_limit)
+        sys.tracebacklimit=ModelRunner.recursion_limit
+        
+        start = timeit.default_timer()
         for t in xrange(ts_min, ts_max + 1):
             self.log("\t%s" % t)
             main_model.do_timestep(t)
-        self.log("\tdone")
+        stop = timeit.default_timer()
+        self.log("\tdone: %s seconds" % (stop - start))
         
         self.log("Creating output writer...")
         output_writer = self.__get_output_writer()        
         self.log("Writing output...")
+        start = timeit.default_timer()
         output_writer.write(storage_repo.column_storage)
+        stop = timeit.default_timer()
+        self.log("\tdone: %s seconds" % (stop - start))
 
     def __read_config(self, config_location):
         config_file = os.path.join(config_location, 'config.yaml')

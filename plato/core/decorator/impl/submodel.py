@@ -98,6 +98,10 @@ class SubModelBinding(object):
         
         return object.__getattribute__(self, name) 
     
+    def do_timestep(self, t):
+        for submodel in self.__submodel_list:
+            submodel.do_timestep(t)
+    
     def __iter__(self):
         return iter(self.__submodel_list)
     
